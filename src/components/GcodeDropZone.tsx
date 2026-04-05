@@ -111,6 +111,9 @@ export function GcodeDropZone({ onGcodeParsed }: GcodeDropZoneProps) {
             <p className="text-xs text-muted-foreground mt-1">
               PrusaSlicer · Bambu Studio · OrcaSlicer · Anycubic · Cura
             </p>
+            <p className="text-xs text-muted-foreground/70 mt-2 italic">
+              ⚠ Los archivos .3mf deben estar sliceados/laminados previamente
+            </p>
           </div>
         </div>
       )}
