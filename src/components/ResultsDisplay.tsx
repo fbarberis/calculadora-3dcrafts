@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import type { CalculationResult } from '@/lib/calculator';
 
 interface ResultsDisplayProps {
@@ -5,74 +6,108 @@ interface ResultsDisplayProps {
 }
 
 export function ResultsDisplay({ result }: ResultsDisplayProps) {
-  return (
-    <div className="result-card animate-fade-in space-y-5">
-      <h3 className="text-lg font-display font-semibold text-foreground">Resultados del cálculo</h3>
+  const costs = [
+    { label: 'Material', value: result.totalMaterialCost, color: 'bg-chart-material' },
+    { label: 'Electricidad', value: result.totalElectricityCost, color: 'bg-chart-electricity' },
+    { label: 'Fallas', value: result.totalFailureCost, color: 'bg-chart-failure' },
+    ...(result.totalDepreciationCost > 0 ? [{ label: 'Depreciación', value: result.totalDepreciationCost, color: 'bg-muted-foreground' }] : []),
+    ...(result.totalLaborCost > 0 ? [{ label: 'Mano de obra', value: result.totalLaborCost, color: 'bg-chart-consumables' }] : []),
+    ...(result.consumablesCost > 0 ? [{ label: 'Insumos', value: result.consumablesCost, color: 'bg-accent' }] : []),
+  ];
+  const maxCost = Math.max(...costs.map(c => c.value), 1);
 
-      <div>
-        <h4 className="text-sm font-medium text-muted-foreground mb-3">Costos por pieza</h4>
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-4"
+    >
+      {/* Cost breakdown bar chart */}
+      <div className="result-card">
+        <h3 className="section-title mb-4">Desglose de costos</h3>
+        <div className="space-y-3">
+          {costs.map((c) => (
+            <div key={c.label}>
+              <div className="flex items-center justify-between text-sm mb-1">
+                <span className="text-muted-foreground">{c.label}</span>
+                <span className="font-medium text-foreground">$ {c.value.toFixed(0)}</span>
+              </div>
+              <div className="h-2 rounded-full bg-muted overflow-hidden">
+                <motion.div
+                  className={`cost-bar ${c.color}`}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(c.value / maxCost) * 100}%` }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Per piece costs */}
+      <div className="result-card">
+        <h3 className="section-title mb-3">Costos por pieza</h3>
         <div className="space-y-2">
           <Row label="Material" value={result.materialCostPerPiece} />
           <Row label="Electricidad" value={result.electricityCostPerPiece} />
           <Row label="Fallas" value={result.failureCostPerPiece} />
+          {result.depreciationCostPerPiece > 0 && <Row label="Depreciación" value={result.depreciationCostPerPiece} />}
+          {result.laborCostPerPiece > 0 && <Row label="Mano de obra" value={result.laborCostPerPiece} />}
           <div className="border-t border-border pt-2">
-            <Row label="Costo total por pieza" value={result.baseCostPerPiece} bold />
+            <Row label="Costo total/pieza" value={result.baseCostPerPiece} bold />
           </div>
         </div>
       </div>
 
-      <div>
-        <h4 className="text-sm font-medium text-muted-foreground mb-3">
-          Costos totales ({result.pieceQuantity} {result.pieceQuantity > 1 ? 'piezas' : 'pieza'})
-        </h4>
+      {/* Final price */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.3 }}
+        className="bg-primary/10 rounded-xl p-5 border border-primary/20"
+      >
+        <h3 className="section-title text-primary mb-3">Precio final</h3>
         <div className="space-y-2">
-          <Row label="Material total" value={result.totalMaterialCost} />
-          <Row label="Electricidad total" value={result.totalElectricityCost} />
-          <Row label="Fallas total" value={result.totalFailureCost} />
-          <div className="border-t border-border pt-2">
-            <Row label="Costo total" value={result.totalCost} bold />
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-primary/10 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-primary mb-3">Precio final</h4>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="font-display font-bold text-foreground">
-              Precio a cobrar ({result.pieceQuantity} {result.pieceQuantity > 1 ? 'piezas' : 'pieza'})
+          <div className="flex items-baseline justify-between">
+            <span className="font-display font-semibold text-foreground">
+              {result.pieceQuantity} {result.pieceQuantity > 1 ? 'piezas' : 'pieza'}
             </span>
-            <span className="font-display font-bold text-xl text-primary">
-              ARS$ {result.totalToCharge.toFixed(2)}
+            <span className="font-display font-bold text-2xl text-primary">
+              $ {result.totalToCharge.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
             </span>
           </div>
           {result.pieceQuantity > 1 && (
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Precio por pieza</span>
+              <span className="text-sm text-muted-foreground">Por pieza</span>
               <span className="font-display font-semibold text-foreground">
-                ARS$ {(result.totalToCharge / result.pieceQuantity).toFixed(2)}
+                $ {(result.totalToCharge / result.pieceQuantity).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
               </span>
             </div>
           )}
           {result.includeMercadoLibre && result.mlCommission && (
             <p className="text-xs text-muted-foreground mt-1">
-              Incluye comisión de MercadoLibre ({result.mlCommission}%)
+              Incluye comisión ML ({result.mlCommission}%)
+            </p>
+          )}
+          {result.shippingCost > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Incluye envío ($ {result.shippingCost.toFixed(0)})
             </p>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
 function Row({ label, value, bold }: { label: string; value: number; bold?: boolean }) {
   return (
     <div className="flex items-center justify-between">
-      <span className={`text-sm ${bold ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
-        {label}
-      </span>
+      <span className={`text-sm ${bold ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>{label}</span>
       <span className={`text-sm ${bold ? 'font-display font-semibold text-foreground' : 'text-foreground'}`}>
-        ARS$ {value.toFixed(2)}
+        $ {value.toFixed(2)}
       </span>
     </div>
   );
