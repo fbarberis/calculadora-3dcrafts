@@ -81,15 +81,27 @@ function parseAnycubic(lines: string[], info: GcodeInfo): void {
   parsePrusaLike(lines, info);
 
   for (const line of lines) {
-    // source_info JSON with model names and count
+    // model_instances is the most reliable count
+    // ; model_instances: 22
+    if (line.includes('model_instances')) {
+      const match = line.match(/model_instances[:\s]+(\d+)/);
+      if (match) {
+        info.pieceCount = parseInt(match[1]);
+      }
+    }
+
+    // source_info JSON with model names
     if (line.includes('source_info') && !info.fileName) {
       try {
-        const jsonStr = line.split('source_info:')[1];
+        const jsonStr = line.split('source_info:')[1]?.trim();
         if (jsonStr) {
           const sourceInfo = JSON.parse(jsonStr);
           if (sourceInfo.models && sourceInfo.models.length > 0) {
             info.fileName = sourceInfo.models[0].name.replace(/_id_\d+_copy_\d+$/, '');
-            info.pieceCount = sourceInfo.models.length;
+            // Use model count from JSON if model_instances wasn't found
+            if (info.pieceCount <= 1) {
+              info.pieceCount = sourceInfo.models.length;
+            }
           }
         }
       } catch { /* ignore parse errors */ }
