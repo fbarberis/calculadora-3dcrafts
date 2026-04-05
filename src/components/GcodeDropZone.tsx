@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { parseGcode, type GcodeInfo, getSlicerLabel } from '@/lib/gcodeParser';
+import { parse3mf } from '@/lib/threemfParser';
 import { Upload, FileText, Loader2 } from 'lucide-react';
 
 interface GcodeDropZoneProps {
@@ -10,19 +11,29 @@ export function GcodeDropZone({ onGcodeParsed }: GcodeDropZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadedFile, setLoadedFile] = useState<{ name: string; slicer: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const processFile = useCallback(async (file: File) => {
-    if (!file.name.toLowerCase().endsWith('.gcode')) {
+    const name = file.name.toLowerCase();
+    if (!name.endsWith('.gcode') && !name.endsWith('.3mf')) {
+      setError('Solo se aceptan archivos .gcode o .3mf');
       return;
     }
     setIsLoading(true);
+    setError(null);
     try {
-      const content = await file.text();
-      const info = parseGcode(content, file.name);
+      let info: GcodeInfo;
+      if (name.endsWith('.3mf')) {
+        info = await parse3mf(file);
+      } else {
+        const content = await file.text();
+        info = parseGcode(content, file.name);
+      }
       setLoadedFile({ name: file.name, slicer: getSlicerLabel(info.slicer) });
       onGcodeParsed(info);
-    } catch (error) {
-      console.error('Error processing gcode:', error);
+    } catch (err) {
+      console.error('Error processing file:', err);
+      setError(err instanceof Error ? err.message : 'Error al procesar el archivo');
     } finally {
       setIsLoading(false);
     }
@@ -58,14 +69,14 @@ export function GcodeDropZone({ onGcodeParsed }: GcodeDropZoneProps) {
       <input
         id="gcode-file-input"
         type="file"
-        accept=".gcode"
+        accept=".gcode,.3mf"
         className="hidden"
         onChange={handleFileInput}
       />
       {isLoading ? (
         <div className="flex flex-col items-center gap-3 py-4">
           <Loader2 className="h-10 w-10 text-primary animate-spin" />
-          <p className="text-sm text-muted-foreground">Analizando archivo G-code...</p>
+          <p className="text-sm text-muted-foreground">Analizando archivo...</p>
         </div>
       ) : loadedFile ? (
         <div className="flex flex-col items-center gap-3 py-4">
@@ -82,12 +93,15 @@ export function GcodeDropZone({ onGcodeParsed }: GcodeDropZoneProps) {
         <div className="flex flex-col items-center gap-3 py-4">
           <Upload className="h-10 w-10 text-muted-foreground" />
           <div className="text-center">
-            <p className="text-sm font-medium text-foreground">Arrastra tu archivo .gcode aquí</p>
+            <p className="text-sm font-medium text-foreground">Arrastra tu archivo .gcode o .3mf aquí</p>
             <p className="text-xs text-muted-foreground mt-1">
               Compatible con PrusaSlicer, Bambu Studio, OrcaSlicer, Anycubic y Cura
             </p>
           </div>
         </div>
+      )}
+      {error && (
+        <p className="text-xs text-destructive mt-2">{error}</p>
       )}
     </div>
   );
