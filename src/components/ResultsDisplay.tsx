@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Info } from 'lucide-react';
 import type { CalculationResult } from '@/lib/calculator';
 
 interface ResultsDisplayProps {
@@ -98,6 +99,12 @@ export function ResultsDisplay({ result }: ResultsDisplayProps) {
           )}
         </div>
       </motion.div>
+
+      {/* Info note */}
+      <div className="flex items-start gap-2 text-xs text-muted-foreground/80 italic px-1">
+        <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+        <span>Los datos se obtienen del archivo sliceado/laminado. Si los valores no son correctos, verificá la configuración del slicer antes de exportar.</span>
+      </div>
     </motion.div>
   );
 }
