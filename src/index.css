@@ -6,14 +6,14 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 220 25% 10%;
+    --background: 220 16% 96%;
+    --foreground: 225 25% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    --card-foreground: 225 25% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 10%;
+    --popover-foreground: 225 25% 12%;
 
     --primary: 243 75% 59%;
     --primary-foreground: 0 0% 100%;
@@ -41,6 +41,11 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
+    --chart-material: 243 75% 59%;
+    --chart-electricity: 38 92% 50%;
+    --chart-failure: 0 72% 51%;
+    --chart-consumables: 165 60% 45%;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -55,25 +60,29 @@
   }
 
   .dark {
-    --background: 225 25% 8%;
+    --background: 225 25% 7%;
     --foreground: 220 15% 90%;
-    --card: 225 20% 12%;
+    --card: 225 20% 11%;
     --card-foreground: 220 15% 90%;
-    --popover: 225 20% 12%;
+    --popover: 225 20% 11%;
     --popover-foreground: 220 15% 90%;
     --primary: 243 75% 65%;
     --primary-foreground: 0 0% 100%;
     --secondary: 225 15% 18%;
     --secondary-foreground: 220 15% 85%;
-    --muted: 225 15% 16%;
+    --muted: 225 15% 15%;
     --muted-foreground: 220 10% 55%;
     --accent: 165 60% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 40%;
     --destructive-foreground: 0 0% 100%;
-    --border: 225 15% 20%;
-    --input: 225 15% 20%;
+    --border: 225 15% 18%;
+    --input: 225 15% 18%;
     --ring: 243 75% 65%;
+    --chart-material: 243 75% 65%;
+    --chart-electricity: 38 92% 55%;
+    --chart-failure: 0 72% 55%;
+    --chart-consumables: 165 60% 50%;
     --sidebar-background: 225 25% 10%;
     --sidebar-foreground: 220 15% 85%;
     --sidebar-primary: 243 75% 65%;
@@ -116,5 +125,13 @@
 
   .slicer-badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .cost-bar {
+    @apply h-2 rounded-full transition-all duration-500;
+  }
+
+  .section-title {
+    @apply text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider;
   }
 }
