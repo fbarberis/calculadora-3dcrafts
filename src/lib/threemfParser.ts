@@ -102,7 +102,7 @@ export async function parse3mf(file: File): Promise<GcodeInfo> {
   }
 
   if (info.printTime === 0 && info.filamentWeight === 0) {
-    throw new Error('No se encontró información de impresión en el archivo .3mf. Asegurate de que fue sliceado.');
+    throw new Error('No se encontró información de impresión en el archivo .3mf. Asegurate de que fue sliceado/laminado antes de exportarlo.');
   }
 
   return info;

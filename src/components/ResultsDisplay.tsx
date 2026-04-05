@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Info } from 'lucide-react';
 import type { CalculationResult } from '@/lib/calculator';
 
 interface ResultsDisplayProps {
